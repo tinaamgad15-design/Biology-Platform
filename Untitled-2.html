@@ -3,111 +3,228 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة مينا التعليمية | V2.0</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>أكاديميتي - منصتي التعليمية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
-        body { font-family: 'Cairo', sans-serif; background: #0f172a; color: #f8fafc; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-        .gradient-text { background: linear-gradient(90deg, #22d3ee, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        :root {
+            --primary-color: #3b82f6; /* أزرق فاتح عصري */
+            --bg-color: #f8fafc; /* خلفية فاتحة هادئة */
+            --sidebar-bg: #1e293b; /* قائمة جانبية غامقة */
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-side: #e2e8f0;
+            --accent-color: #fbbf24; /* أصفر دافئ للتفاعل */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+        }
+
+        /* القائمة الجانبية */
+        .sidebar {
+            width: 280px;
+            height: 100%;
+            background-color: var(--sidebar-bg);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar h2 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 50px;
+            text-align: center;
+        }
+
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .nav-item {
+            padding: 15px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s, color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: var(--text-side);
+        }
+
+        .nav-item i {
+            font-size: 20px;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--accent-color);
+        }
+
+        /* المحتوى الرئيسي */
+        .main-content {
+            flex-grow: 1;
+            padding: 50px;
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .btn-upload {
+            background: var(--primary-color);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 10px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-upload:hover {
+            background: #2563eb;
+        }
+
+        /* بطاقات الإحصائيات */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .stat-icon {
+            font-size: 40px;
+            color: var(--primary-color);
+        }
+
+        .stat-details h3 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .stat-details p {
+            color: #64748b;
+        }
+
+        /* قسم الفيديوهات */
+        .video-section {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+
+        .video-section h3 {
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
+
+        .video-placeholder {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            color: #475569;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .video-placeholder:hover {
+            color: #e2e8f0;
+        }
     </style>
 </head>
 <body>
 
-    <nav class="p-6 glass sticky top-0 z-50 flex justify-between items-center border-b border-slate-700">
-        <h1 class="text-2xl font-bold gradient-text">MINA ACADEMY</h1>
-        <div id="userInfo" class="text-sm text-slate-400"></div>
-    </nav>
-
-    <div id="loginView" class="max-w-md mx-auto mt-20 p-8 glass rounded-3xl shadow-2xl transition-all">
-        <h2 class="text-3xl font-bold text-center mb-8">تسجيل الدخول</h2>
-        <input id="phone" type="text" placeholder="رقم الموبايل" class="w-full p-4 mb-4 rounded-xl bg-slate-900 border border-slate-700 focus:border-cyan-500 outline-none">
-        <input id="pass" type="password" placeholder="كلمة السر" class="w-full p-4 mb-6 rounded-xl bg-slate-900 border border-slate-700 focus:border-cyan-500 outline-none">
-        <button onclick="auth()" class="w-full bg-cyan-500 hover:bg-cyan-600 text-slate-900 font-bold py-4 rounded-xl shadow-lg transition transform hover:scale-105">دخول</button>
+    <div class="sidebar">
+        <h2>أكاديميتي</h2>
+        <div class="nav-items">
+            <div class="nav-item active"><i class="fas fa-home"></i> الرئيسة</div>
+            <div class="nav-item"><i class="fas fa-play-circle"></i> دروسي</div>
+            <div class="nav-item"><i class="fas fa-users"></i> طلابي</div>
+            <div class="nav-item"><i class="fas fa-chart-bar"></i> التقارير</div>
+            <div class="nav-item"><i class="fas fa-cog"></i> الإعدادات</div>
+        </div>
     </div>
 
-    <div id="adminView" class="hidden p-8 max-w-6xl mx-auto">
-        <div class="grid md:grid-cols-4 gap-8">
-            <div class="glass p-6 rounded-2xl h-fit">
-                <h3 class="font-bold mb-4 text-cyan-400">إضافة درس جديد</h3>
-                <input id="title" type="text" placeholder="عنوان الدرس" class="w-full p-3 mb-3 rounded-lg bg-slate-800 border border-slate-700">
-                <input id="url" type="text" placeholder="لينك يوتيوب" class="w-full p-3 mb-4 rounded-lg bg-slate-800 border border-slate-700">
-                <button onclick="addLesson()" class="w-full bg-green-600 py-3 rounded-lg font-bold">نشر الآن</button>
+    <div class="main-content">
+        <div class="header">
+            <h1>مرحباً بك، دكتور أحمد 👋</h1>
+            <button class="btn-upload">نشر درس جديد</button>
+        </div>
+
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
+                <div class="stat-details">
+                    <h3>150</h3>
+                    <p>طالب مشترك</p>
+                </div>
             </div>
-            <div class="md:col-span-3">
-                <h3 class="font-bold mb-4">الدروس الحالية على السيرفر</h3>
-                <div id="adminList" class="grid gap-4"></div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-book-open"></i></div>
+                <div class="stat-details">
+                    <h3>12</h3>
+                    <p>كورس متاح</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-star"></i></div>
+                <div class="stat-details">
+                    <h3>4.9</h3>
+                    <p>تقييم الطلاب</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="video-section">
+            <h3>أحدث درس مرفوع: "أساسيات تصميم المنصات التعليمية"</h3>
+            <div class="video-placeholder">
+                <i class="fas fa-play"></i>
+                <p style="margin-right: 15px;">الفيديو جاهز للعرض</p>
             </div>
         </div>
     </div>
 
-    <div id="studentView" class="hidden p-8 max-w-7xl mx-auto">
-        <div id="lessonsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
-    </div>
-
-    <script>
-        // السيرفر الوهمي (باستخدام ذاكرة المتصفح حالياً لضمان العمل المجاني 100%)
-        let lessons = JSON.parse(localStorage.getItem('mina_cloud_db')) || [];
-
-        function auth() {
-            const p = document.getElementById('phone').value;
-            const s = document.getElementById('pass').value;
-
-            if(p === "000" && s === "111") {
-                document.getElementById('loginView').style.display = 'none';
-                document.getElementById('adminView').classList.remove('hidden');
-                document.getElementById('userInfo').innerText = "وضع المدرس 🛠️";
-                renderAdmin();
-            } else if(p !== "" && s !== "") {
-                document.getElementById('loginView').style.display = 'none';
-                document.getElementById('studentView').classList.remove('hidden');
-                document.getElementById('userInfo').innerText = "حساب طالب 🎓";
-                renderStudent();
-            }
-        }
-
-        function addLesson() {
-            const t = document.getElementById('title').value;
-            let u = document.getElementById('url').value;
-            if(!t || !u) return alert("املا البيانات");
-
-            if(u.includes("watch?v=")) u = u.replace("watch?v=", "embed/");
-            
-            lessons.push({id: Date.now(), title: t, url: u});
-            localStorage.setItem('mina_cloud_db', JSON.stringify(lessons));
-            renderAdmin();
-            alert("تم الرفع للسيرفر!");
-        }
-
-        function renderAdmin() {
-            const list = document.getElementById('adminList');
-            list.innerHTML = lessons.map(l => `
-                <div class="flex justify-between p-4 glass rounded-xl">
-                    <span>${l.title}</span>
-                    <button onclick="deleteL(${l.id})" class="text-red-400 font-bold">حذف</button>
-                </div>
-            `).join('');
-        }
-
-        function renderStudent() {
-            const grid = document.getElementById('lessonsGrid');
-            grid.innerHTML = lessons.map(l => `
-                <div class="glass rounded-3xl overflow-hidden shadow-xl hover:border-cyan-500/50 border border-transparent transition">
-                    <iframe class="w-full aspect-video" src="${l.url}" frameborder="0" allowfullscreen></iframe>
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold mb-2">${l.title}</h3>
-                        <p class="text-slate-400 text-sm">شرح حصري لمنصة المستر مينا</p>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function deleteL(id) {
-            lessons = lessons.filter(l => l.id !== id);
-            localStorage.setItem('mina_cloud_db', JSON.stringify(lessons));
-            renderAdmin();
-        }
-    </script>
 </body>
 </html>
