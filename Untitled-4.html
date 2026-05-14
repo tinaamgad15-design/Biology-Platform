@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="siteTitleTag">Mina Academy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --bg: #f8fafc; --text: #1e293b; --card: #ffffff; --sidebar: #0f172a; }
+        .dark-theme { --bg: #020617; --text: #f1f5f9; --card: #1e293b; --sidebar: #000000; }
+        body { font-family: 'Cairo', sans-serif; background-color: var(--bg); color: var(--text); transition: 0.3s; display: flex; height: 100vh; overflow: hidden; }
+        .sidebar { width: 280px; background-color: var(--sidebar); padding: 25px; color: #e2e8f0; display: flex; flex-direction: column; }
+        .main-content { flex-grow: 1; padding: 30px; overflow-y: auto; }
+        .glass-card { background: var(--card); padding: 20px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05); }
+        .btn-action { background: #2563eb; color: white; padding: 10px 20px; border-radius: 12px; font-weight: 600; transition: 0.3s; }
+        #authOverlay { position: fixed; inset: 0; background: #0f172a; z-index: 5000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body id="bodyTag">
+
+    <div id="authOverlay" class="hidden">
+        <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-md text-center shadow-2xl">
+            <h2 class="text-2xl font-bold mb-2 text-blue-600 italic">MINA ACADEMY</h2>
+            <div class="space-y-4">
+                <input id="loginPhone" type="tel" placeholder="رقم الموبايل" class="w-full p-4 rounded-2xl border text-right text-slate-800 outline-none">
+                <input id="loginPass" type="password" placeholder="كلمة السر (للمدرس فقط)" class="w-full p-4 rounded-2xl border text-right text-slate-800 outline-none">
+                <button onclick="checkAuth()" class="btn-action w-full py-4 text-lg">دخول</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <h2 id="sideLogo" class="text-2xl font-bold text-blue-500 mb-10 text-center italic">MINA ACADEMY</h2>
+        <nav class="space-y-4 flex-grow">
+            <div class="flex items-center gap-3 p-4 bg-blue-600/20 text-blue-400 rounded-2xl"><i class="fas fa-home"></i> الرئيسية</div>
+            <div onclick="toggleTheme()" class="flex items-center gap-3 p-4 hover:bg-white/5 rounded-2xl cursor-pointer"><i class="fas fa-adjust"></i> وضع الدارك</div>
+            <div onclick="logout()" class="flex items-center gap-3 p-4 text-red-400 hover:bg-red-500/10 rounded-2xl cursor-pointer mt-10"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</div>
+        </nav>
+        <button id="editPanelBtn" onclick="toggleEditModal()" class="hidden w-full p-4 bg-orange-500/10 text-orange-500 rounded-2xl border border-orange-500/20 mb-4 font-bold text-sm">لوحة التحكم</button>
+    </div>
+
+    <div class="main-content">
+        <div class="flex justify-between items-center mb-8">
+            <h1 id="welcomeMsg" class="text-2xl font-bold text-blue-500">مرحباً بك</h1>
+            <button id="adminPublishBtn" onclick="toggleUploadModal()" class="btn-action hidden">+ نشر درس</button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+            <div class="glass-card">
+                <p class="text-slate-400 text-xs mb-1">الطلاب المسجلين</p>
+                <h4 id="studentCount" class="text-4xl font-bold text-blue-600">0</h4>
+            </div>
+            <div id="adminStats" class="glass-card hidden">
+                <p class="text-orange-500 text-xs mb-1">الأجهزة المتصلة</p>
+                <div id="deviceList" class="text-[10px] text-slate-500 mt-2 max-h-20 overflow-auto"></div>
+            </div>
+        </div>
+
+        <div id="lessonsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+    </div>
+
+    <div id="editModal" class="fixed inset-0 bg-black/70 hidden z-[6000] flex items-center justify-center p-6">
+        <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-lg shadow-2xl">
+            <h3 class="text-xl font-bold mb-6 text-slate-800">تعديل المنصة</h3>
+            <input id="editSiteTitle" type="text" placeholder="اسم المنصة" class="w-full p-4 mb-4 border rounded-2xl text-slate-800">
+            <input id="editTeacherName" type="text" placeholder="اسم المدرس" class="w-full p-4 mb-6 border rounded-2xl text-slate-800">
+            <div class="flex gap-4">
+                <button onclick="saveGlobalEdits()" class="btn-action flex-1">حفظ</button>
+                <button onclick="toggleEditModal()" class="bg-slate-100 p-4 rounded-2xl flex-1 text-slate-600 font-bold">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="uploadModal" class="fixed inset-0 bg-black/70 hidden z-[6000] flex items-center justify-center p-6 text-slate-800">
+        <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-md shadow-2xl text-right">
+            <h3 class="text-xl font-bold mb-6">نشر محاضرة</h3>
+            <input id="videoTitle" type="text" placeholder="العنوان" class="w-full p-4 mb-4 border rounded-2xl">
+            <input id="videoLink" type="text" placeholder="رابط يوتيوب" class="w-full p-4 mb-8 border rounded-2xl">
+            <button onclick="publishVideo()" class="btn-action w-full py-4 text-lg">نشر</button>
+        </div>
+    </div>
+
+    <script>
+        let lessons = JSON.parse(localStorage.getItem('mina_v5_lessons')) || [];
+        let siteData = JSON.parse(localStorage.getItem('mina_v5_data')) || { title: "Mina Academy", teacher: "مستر مينا" };
+        let visitors = JSON.parse(localStorage.getItem('mina_v5_visitors')) || [];
+        let isAdmin = false;
+
+        // عند فتح الصفحة، نتأكد إذا كان مسجلاً للدخول مسبقاً
+        window.onload = function() {
+            const savedUser = JSON.parse(localStorage.getItem('mina_active_session'));
+            if (savedUser) {
+                applyLoginLogic(savedUser.phone, savedUser.pass);
+            } else {
+                document.getElementById('authOverlay').classList.remove('hidden');
+            }
+        }
+
+        function checkAuth() {
+            const phone = document.getElementById('loginPhone').value;
+            const pass = document.getElementById('loginPass').value;
+            const phoneRegex = /^01[0125][0-9]{8}$/;
+
+            if (!phoneRegex.test(phone)) return alert("رقم موبايل مصري صحيح!");
+
+            // حفظ الجلسة في المتصفح
+            localStorage.setItem('mina_active_session', JSON.stringify({ phone, pass }));
+            applyLoginLogic(phone, pass);
+        }
+
+        function applyLoginLogic(phone, pass) {
+            const device = /android|iPhone|iPad|windows/i.test(navigator.userAgent) ? "Device Detected" : "Web Browser";
+            
+            if (!visitors.find(v => v.id === phone)) {
+                visitors.push({ id: phone, device: device });
+                localStorage.setItem('mina_v5_visitors', JSON.stringify(visitors));
+            }
+
+            if (phone === "01234567890" && pass === "123") {
+                isAdmin = true;
+                document.getElementById('editPanelBtn').classList.remove('hidden');
+                document.getElementById('adminPublishBtn').classList.remove('hidden');
+                document.getElementById('adminStats').classList.remove('hidden');
+                document.getElementById('welcomeMsg').innerText = `أهلاً يا ${siteData.teacher} 👋`;
+            } else {
+                document.getElementById('welcomeMsg').innerText = `مرحباً بك (موبايل: ${phone})`;
+            }
+
+            document.getElementById('authOverlay').classList.add('hidden');
+            renderUI();
+        }
+
+        function logout() {
+            if(confirm("هل تريد تسجيل الخروج؟")) {
+                localStorage.removeItem('mina_active_session');
+                location.reload(); // إعادة تحميل الصفحة لإظهار شاشة الدخول
+            }
+        }
+
+        function renderUI() {
+            document.getElementById('siteTitleTag').innerText = siteData.title;
+            document.getElementById('sideLogo').innerText = siteData.title;
+            document.getElementById('studentCount').innerText = visitors.length;
+            if(isAdmin) {
+                document.getElementById('deviceList').innerHTML = visitors.map(v => 
+                    `<div class="border-b border-slate-100 py-1">📱 ${v.id}</div>`
+                ).join('');
+            }
+            const grid = document.getElementById('lessonsGrid');
+            grid.innerHTML = lessons.map(l => `
+                <div class="glass-card !p-0 overflow-hidden group hover:shadow-lg transition">
+                    <iframe class="w-full aspect-video" src="${l.url}" frameborder="0" allowfullscreen></iframe>
+                    <div class="p-5 flex justify-between">
+                        <h4 class="font-bold">${l.title}</h4>
+                        ${isAdmin ? `<button onclick="deleteLesson(${l.id})" class="text-red-400"><i class="fas fa-trash"></i></button>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleTheme() { document.getElementById('bodyTag').classList.toggle('dark-theme'); }
+        function toggleEditModal() { document.getElementById('editModal').classList.toggle('hidden'); }
+        function toggleUploadModal() { document.getElementById('uploadModal').classList.toggle('hidden'); }
+        function saveGlobalEdits() {
+            siteData.title = document.getElementById('editSiteTitle').value;
+            siteData.teacher = document.getElementById('editTeacherName').value;
+            localStorage.setItem('mina_v5_data', JSON.stringify(siteData));
+            location.reload();
+        }
+        function publishVideo() {
+            const title = document.getElementById('videoTitle').value;
+            let url = document.getElementById('videoLink').value;
+            if(url.includes("watch?v=")) url = url.replace("watch?v=", "embed/");
+            lessons.push({ id: Date.now(), title, url });
+            localStorage.setItem('mina_v5_lessons', JSON.stringify(lessons));
+            toggleUploadModal(); renderUI();
+        }
+        function deleteLesson(id) {
+            lessons = lessons.filter(l => l.id !== id);
+            localStorage.setItem('mina_v5_lessons', JSON.stringify(lessons));
+            renderUI();
+        }
+    </script>
+</body>
+</html>
