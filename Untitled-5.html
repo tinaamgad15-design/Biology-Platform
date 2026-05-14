@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="mainTitle">Mina Master Platform | V10.0 Pro</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root { --p: #3b82f6; --s: #0f172a; --bg: #020617; }
+        * { font-family: 'Cairo', sans-serif; box-sizing: border-box; }
+        body { background-color: var(--bg); color: #e2e8f0; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        
+        /* Sidebar Styles */
+        .sidebar { width: 320px; background: #0f172a; border-left: 1px solid #1e293b; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .nav-link { padding: 1.25rem 1.5rem; border-radius: 1.25rem; cursor: pointer; display: flex; align-items: center; gap: 15px; font-weight: 700; color: #64748b; margin-bottom: 0.5rem; }
+        .nav-link:hover, .nav-link.active { background: #1d4ed8; color: white; box-shadow: 0 10px 20px -5px rgba(29, 78, 216, 0.5); }
+
+        /* Main Content Area */
+        .viewport { flex-grow: 1; overflow-y: auto; padding: 2.5rem; scroll-behavior: smooth; }
+        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
+        .card-pro { border-radius: 2.5rem; padding: 2rem; transition: 0.3s; }
+        .card-pro:hover { transform: translateY(-5px); border-color: var(--p); }
+
+        /* Admin Components */
+        .admin-only { display: none !important; }
+        .is-admin .admin-only { display: block !important; }
+        .is-admin .student-only { display: none !important; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #020617; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+        
+        #authLayer { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; }
+        .hidden { display: none !important; }
+        
+        @media (max-width: 1024px) {
+            .sidebar { position: fixed; bottom: 0; width: 100%; height: 70px; flex-direction: row; z-index: 5000; padding: 0 10px; border: none; }
+            .sidebar-brand, .logout-txt { display: none; }
+            .sidebar nav { flex-direction: row; width: 100%; justify-content: space-around; }
+            .viewport { padding: 1.5rem; padding-bottom: 100px; }
+        }
+    </style>
+</head>
+<body id="appBody">
+
+    <div id="authLayer">
+        <div class="glass p-12 rounded-[4rem] w-full max-w-lg border border-slate-800 text-center relative overflow-hidden">
+            <div class="absolute -top-20 -left-20 w-64 h-64 bg-blue-600/10 rounded-full blur-[100px]"></div>
+            <h1 class="text-5xl font-black text-blue-500 mb-4 italic tracking-tighter">MINA SYSTEM</h1>
+            <p class="text-slate-500 mb-10 font-bold uppercase tracking-[0.2em]">High-End Educational Core</p>
+            
+            <div class="space-y-5 relative z-10">
+                <div class="group">
+                    <input id="loginPhone" type="tel" placeholder="رقم الموبايل" class="w-full p-5 rounded-3xl bg-slate-800/50 border border-slate-700 outline-none focus:border-blue-500 text-center text-xl font-bold">
+                </div>
+                <div class="group">
+                    <input id="loginPass" type="password" placeholder="كود التحقق (للمسؤول)" class="w-full p-5 rounded-3xl bg-slate-800/50 border border-slate-700 outline-none focus:border-blue-500 text-center text-xl">
+                </div>
+                <button onclick="handleLogin()" class="w-full py-5 bg-blue-600 rounded-3xl font-black text-2xl hover:bg-blue-700 transition shadow-2xl shadow-blue-500/20 active:scale-95">دخول النظام</button>
+            </div>
+            <p class="mt-8 text-[10px] text-slate-600">ID: 01234567890 | PASS: 123</p>
+        </div>
+    </div>
+
+    <div class="flex h-screen w-full">
+        <aside class="sidebar flex flex-col p-8">
+            <div class="sidebar-brand mb-12 text-center">
+                <h2 id="brandName" class="text-3xl font-black text-white italic">MINA</h2>
+                <div class="w-10 h-1 bg-blue-600 mx-auto mt-2 rounded-full"></div>
+            </div>
+
+            <nav id="mainNav" class="flex flex-col gap-2 flex-grow">
+                </nav>
+
+            <div class="admin-only border-t border-slate-800 pt-6 mt-6 space-y-3">
+                <button onclick="switchView('control-center')" class="w-full p-4 bg-amber-500/10 text-amber-500 rounded-2xl font-black flex items-center gap-3 hover:bg-amber-500 hover:text-black">
+                    <i class="fas fa-microchip"></i> غرفة التحكم
+                </button>
+            </div>
+            
+            <button onclick="logout()" class="mt-6 p-4 text-red-500 hover:bg-red-500/10 rounded-2xl font-bold flex items-center gap-3">
+                <i class="fas fa-power-off"></i> <span class="logout-txt">خروج</span>
+            </button>
+        </aside>
+
+        <main class="viewport">
+            
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
+                <div>
+                    <h1 id="viewHeader" class="text-5xl font-black text-white tracking-tight">الرئيسية</h1>
+                    <p id="viewSub" class="text-slate-500 mt-3 font-bold">مرحباً بك في لوحة تحكمك المتطورة</p>
+                </div>
+                <div class="admin-only flex gap-4">
+                    <button onclick="openPanel('addTab')" class="bg-slate-800 px-6 py-3 rounded-2xl font-bold border border-slate-700 hover:bg-slate-700">+ إضافة قسم</button>
+                    <button onclick="openPanel('addContent')" class="bg-blue-600 px-8 py-3 rounded-2xl font-black shadow-xl hover:scale-105">+ إضافة محتوى</button>
+                </div>
+            </div>
+
+            <div id="mainGrid" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+                </div>
+
+            <div id="view-control-center" class="hidden space-y-10 animate__animated animate__fadeIn">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="glass card-pro">
+                        <p class="text-slate-400 font-bold">إجمالي المشتركين</p>
+                        <h3 id="stat-users" class="text-5xl font-black mt-2 text-blue-500">0</h3>
+                    </div>
+                    <div class="glass card-pro">
+                        <p class="text-slate-400 font-bold">إجمالي المحتوى</p>
+                        <h3 id="stat-items" class="text-5xl font-black mt-2 text-green-500">0</h3>
+                    </div>
+                    <div class="glass card-pro">
+                        <p class="text-slate-400 font-bold">زيارات اليوم</p>
+                        <h3 class="text-5xl font-black mt-2 text-amber-500">42</h3>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/50 p-10 rounded-[3rem] border border-slate-800">
+                    <h3 class="text-2xl font-black mb-8 italic">تعديل هوية المنصة</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <input id="set-brand" type="text" placeholder="اسم المنصة" class="p-5 rounded-2xl bg-slate-800 border-none outline-none">
+                        <input id="set-teacher" type="text" placeholder="اسمك الظاهر" class="p-5 rounded-2xl bg-slate-800 border-none outline-none">
+                        <button onclick="updateSettings()" class="md:col-span-2 py-5 bg-white text-black rounded-3xl font-black text-xl">حفظ التغييرات الشاملة</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="modalContainer" class="fixed inset-0 bg-black/90 z-[20000] hidden flex items-center justify-center p-6 backdrop-blur-xl">
+        <div id="panel-addTab" class="hidden glass p-12 rounded-[4rem] w-full max-w-md border border-blue-500/30">
+            <h2 class="text-3xl font-black mb-8 text-blue-400">إضافة قسم جديد</h2>
+            <input id="new-tab-name" type="text" placeholder="اسم القسم (مثلاً: ثانوية عامة)" class="w-full p-5 rounded-2xl bg-slate-800 border-none mb-8">
+            <div class="flex gap-4">
+                <button onclick="commitNewTab()" class="flex-1 py-4 bg-blue-600 rounded-2xl font-black text-xl">تأكيد</button>
+                <button onclick="closePanel()" class="flex-1 py-4 bg-slate-800 rounded-2xl font-bold">إلغاء</button>
+            </div>
+        </div>
+
+        <div id="panel-addContent" class="hidden glass p-12 rounded-[4rem] w-full max-w-2xl border border-green-500/30 text-right">
+            <h2 class="text-3xl font-black mb-8 text-green-400">رفع محتوى جديد</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <input id="item-title" type="text" placeholder="عنوان الدرس" class="w-full p-5 rounded-2xl bg-slate-800 border-none">
+                <select id="item-type" class="w-full p-5 rounded-2xl bg-slate-800 border-none outline-none">
+                    <option value="video">فيديو (YouTube / Direct)</option>
+                    <option value="pdf">ملف PDF / مذكرة</option>
+                </select>
+                <input id="item-link" type="text" placeholder="الرابط أو المسار" class="md:col-span-2 w-full p-5 rounded-2xl bg-slate-800 border-none">
+            </div>
+            <button onclick="commitNewItem()" class="w-full py-5 bg-green-600 rounded-3xl font-black text-2xl">نشر المحتوى فوراً</button>
+        </div>
+    </div>
+
+    <script>
+        // داتابيس المنصة المركزية (V10)
+        let storage = JSON.parse(localStorage.getItem('mina_v10_core')) || {
+            config: { brand: "MINA ACADEMY", teacher: "مستر مينا" },
+            tabs: [{id: 'home', name: 'الرئيسية', icon: 'fa-house'}],
+            data: {}, // id: [{title, type, src}]
+            users: []
+        };
+        let session = JSON.parse(localStorage.getItem('m_session')) || null;
+        let currentTab = 'home';
+
+        window.onload = () => { if(session) startEngine(); };
+
+        function handleLogin() {
+            const phone = document.getElementById('loginPhone').value;
+            const pass = document.getElementById('loginPass').value;
+            if(!/^01[0125][0-9]{8}$/.test(phone)) return alert("الرقم مش مظبوط!");
+
+            session = { phone, isAdmin: (phone === "01234567890" && pass === "123") };
+            localStorage.setItem('m_session', JSON.stringify(session));
+            if(!storage.users.includes(phone)) storage.users.push(phone);
+            save(); startEngine();
+        }
+
+        function startEngine() {
+            document.getElementById('authLayer').classList.add('hidden');
+            if(session.isAdmin) document.getElementById('appBody').classList.add('is-admin');
+            document.getElementById('brandName').innerText = storage.config.brand;
+            document.getElementById('set-brand').value = storage.config.brand;
+            document.getElementById('set-teacher').value = storage.config.teacher;
+            renderNav(); renderGrid();
+        }
+
+        function renderNav() {
+            const nav = document.getElementById('mainNav');
+            nav.innerHTML = storage.tabs.map(t => `
+                <div onclick="switchView('${t.id}')" class="nav-link ${currentTab === t.id ? 'active' : ''}">
+                    <i class="fas ${t.icon || 'fa-folder'}"></i> <span>${t.name}</span>
+                </div>
+            `).join('');
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('mainGrid');
+            const items = storage.data[currentTab] || [];
+            grid.innerHTML = items.length ? items.map((item, idx) => `
+                <div class="glass card-pro group relative overflow-hidden">
+                    <div class="aspect-video mb-6 rounded-3xl overflow-hidden bg-black">
+                        ${renderPlayer(item.src, item.type)}
+                    </div>
+                    <h3 class="text-2xl font-black text-white">${item.title}</h3>
+                    <p class="text-slate-500 mt-2 font-bold">${storage.config.teacher} • ${item.type.toUpperCase()}</p>
+                    ${session.isAdmin ? `<button onclick="deleteItem(${idx})" class="absolute top-6 right-6 bg-red-600 w-10 h-10 rounded-full opacity-0 group-hover:opacity-100"><i class="fas fa-trash-alt text-xs"></i></button>` : ''}
+                </div>
+            `).join('') : '<div class="col-span-full py-20 text-center opacity-20 text-4xl font-black italic tracking-widest uppercase">No Content Found</div>';
+            
+            document.getElementById('stat-users').innerText = storage.users.length;
+            document.getElementById('stat-items').innerText = Object.values(storage.data).flat().length;
+        }
+
+        function renderPlayer(src, type) {
+            if(type === 'video') {
+                if(src.includes('youtube.com') || src.includes('youtu.be')) {
+                    const id = src.split('v=')[1]?.split('&')[0] || src.split('/').pop();
+                    return `<iframe class="w-full h-full" src="https://www.youtube.com/embed/${id}?modestbranding=1&rel=0" frameborder="0" allowfullscreen></iframe>`;
+                }
+                return `<video controls class="w-full h-full"><source src="${src}" type="video/mp4"></video>`;
+            }
+            return `<div class="w-full h-full flex flex-col items-center justify-center bg-slate-800 gap-4">
+                <i class="fas fa-file-pdf text-5xl text-red-500"></i>
+                <a href="${src}" target="_blank" class="bg-white text-black px-6 py-2 rounded-xl font-black">تحميل الملزمة</a>
+            </div>`;
+        }
+
+        function switchView(tabId) {
+            currentTab = tabId;
+            const tab = storage.tabs.find(t => t.id === tabId);
+            
+            document.querySelectorAll('section, #mainGrid, #view-control-center').forEach(el => el.classList.add('hidden'));
+            
+            if(tabId === 'control-center') {
+                document.getElementById('view-control-center').classList.remove('hidden');
+                document.getElementById('viewHeader').innerText = "غرفة التحكم";
+            } else {
+                document.getElementById('mainGrid').classList.remove('hidden');
+                document.getElementById('viewHeader').innerText = tab.name;
+                renderGrid();
+            }
+            renderNav();
+        }
+
+        function commitNewTab() {
+            const name = document.getElementById('new-tab-name').value;
+            if(!name) return;
+            storage.tabs.push({ id: 'tab_'+Date.now(), name, icon: 'fa-star' });
+            save(); renderNav(); closePanel();
+        }
+
+        function commitNewItem() {
+            const title = document.getElementById('item-title').value;
+            const type = document.getElementById('item-type').value;
+            const src = document.getElementById('item-link').value;
+            if(!title || !src) return alert("املا البيانات!");
+
+            if(!storage.data[currentTab]) storage.data[currentTab] = [];
+            storage.data[currentTab].push({ title, type, src });
+            save(); renderGrid(); closePanel();
+        }
+
+        function deleteItem(idx) {
+            if(confirm("حذف أكيد؟")) {
+                storage.data[currentTab].splice(idx, 1);
+                save(); renderGrid();
+            }
+        }
+
+        function updateSettings() {
+            storage.config.brand = document.getElementById('set-brand').value;
+            storage.config.teacher = document.getElementById('set-teacher').value;
+            save(); location.reload();
+        }
+
+        function save() { localStorage.setItem('mina_v10_core', JSON.stringify(storage)); }
+        function openPanel(id) { 
+            document.getElementById('modalContainer').classList.remove('hidden');
+            document.getElementById('panel-'+id).classList.remove('hidden');
+        }
+        function closePanel() { 
+            document.getElementById('modalContainer').classList.add('hidden');
+            document.querySelectorAll('#modalContainer > div').forEach(d => d.classList.add('hidden'));
+        }
+        function logout() { localStorage.removeItem('m_session'); location.reload(); }
+    </script>
+</body>
+</html>
